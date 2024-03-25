@@ -11,6 +11,7 @@ class  Config{
         std::string _login;
         std::string _password;
         std::string _database;
+        
 
     public:
         static Config& get();
@@ -27,5 +28,6 @@ class  Config{
         const std::string& get_password() const ;
         const std::string& get_database() const ;
 };
+
 
 #endif

@@ -6,6 +6,7 @@
 #include <istream>
 #include <ostream>
 
+
 bool get_identity(const std::string identity, std::string &login, std::string &password)
 {
     std::istringstream istr(identity);

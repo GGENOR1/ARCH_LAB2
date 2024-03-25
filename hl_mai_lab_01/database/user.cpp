@@ -10,6 +10,11 @@
 #include <sstream>
 #include <exception>
 
+#include <openssl/evp.h>
+#include <openssl/sha.h>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 using namespace Poco::Data::Keywords;
 using Poco::Data::Session;
 using Poco::Data::Statement;
@@ -23,6 +28,7 @@ namespace database
         {
 
             Poco::Data::Session session = database::Database::get().create_session();
+            
             Statement create_stmt(session);
             create_stmt << "CREATE TABLE IF NOT EXISTS users (id SERIAL,"
                         << "first_name VARCHAR(256) NOT NULL,"
@@ -145,6 +151,50 @@ namespace database
         return {};
     }
 
+
+
+       std::optional<User> User::delete_by_id(long id)
+    {
+        try
+        {
+            Poco::Data::Session session = database::Database::get().create_session();
+            Poco::Data::Statement select(session);
+            User removed_user;
+            // Выборка данных пользователя перед удалением
+            select << "SELECT id, first_name, last_name, email, title, login, password FROM users WHERE id=$1",
+            into(removed_user._id),
+            into(removed_user._first_name),
+            into(removed_user._last_name),
+            into(removed_user._email),
+            into(removed_user._title),
+            into(removed_user._login),
+            into(removed_user._password),
+            use(id),
+            range(0, 1);
+            select.execute();
+            Poco::Data::RecordSet rs(select);
+            if (rs.moveFirst())
+            {
+                Poco::Data::Statement remove(session);
+                remove << "DELETE FROM users WHERE id = $1",
+                use(id);
+                remove.execute();
+            }
+            return removed_user;
+        }
+    catch (Poco::Data::PostgreSQL::ConnectionException &e)
+    {
+        std::cout << "connection:" << e.what() << std::endl;
+        throw;
+    }
+    catch (Poco::Data::PostgreSQL::StatementException &e)
+    {
+        std::cout << "statement:" << e.what() << std::endl;
+        throw;
+    }
+    }
+
+
     std::vector<User> User::read_all()
     {
         try
@@ -234,6 +284,23 @@ namespace database
         {
             Poco::Data::Session session = database::Database::get().create_session();
             Poco::Data::Statement insert(session);
+// Тут хэшируем пароль
+        unsigned char hash[SHA256_DIGEST_LENGTH];
+        EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+        const EVP_MD *md = EVP_sha256();
+
+        EVP_DigestInit_ex(mdctx, md, NULL);
+        EVP_DigestUpdate(mdctx, _password.c_str(), _password.length());
+        EVP_DigestFinal_ex(mdctx, hash, NULL);
+        EVP_MD_CTX_free(mdctx);
+
+        // и переводим в шестнадцатеричный формат
+        std::stringstream ss;
+        for(int i = 0; i < SHA256_DIGEST_LENGTH; ++i)
+        {
+            ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+        }
+        std::string hashed_password = ss.str();
 
             insert << "INSERT INTO users (first_name,last_name,email,title,login,password) VALUES($1, $2, $3, $4, $5, $6)",
                 use(_first_name),
@@ -241,7 +308,7 @@ namespace database
                 use(_email),
                 use(_title),
                 use(_login),
-                use(_password);
+                use(hashed_password);
 
             insert.execute();
 
@@ -268,6 +335,183 @@ namespace database
             throw;
         }
     }
+
+
+    std::optional<User> User::update_to_mysql (
+        long id, 
+        std::string first_name, 
+        std::string last_name,
+        std::string login, 
+        std::string password,
+        std::string email,
+        std::string title
+    )
+    {
+        try
+        {
+             Poco::Data::Session session = database::Database::get().create_session();
+        Poco::Data::Statement select(session);
+        User update_user;
+        unsigned char hash[SHA256_DIGEST_LENGTH];
+        EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+        const EVP_MD *md = EVP_sha256();
+
+        EVP_DigestInit_ex(mdctx, md, NULL);
+        EVP_DigestUpdate(mdctx, password.c_str(), password.length());
+        EVP_DigestFinal_ex(mdctx, hash, NULL);
+        EVP_MD_CTX_free(mdctx);
+        std::stringstream ss;
+        for(int i = 0; i < SHA256_DIGEST_LENGTH; ++i)
+        {
+            ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+        }
+        std::string hashed_password = ss.str();
+
+
+        select << "SELECT id, first_name, last_name, email, title, login, password  FROM users WHERE id=$1",
+            into(update_user._id),
+            into(update_user._first_name),
+            into(update_user._last_name),
+            into(update_user._email),
+            into(update_user._title),
+            into(update_user._login),
+            into(update_user._password),
+            use(id),
+            range(0, 1);
+            select.execute();
+            Poco::Data::RecordSet rs(select);
+            if (rs.moveFirst())
+            {
+                Poco::Data::Statement update(session);
+                update << "UPDATE users SET first_name=$1, last_name=$2, login=$3, password=$4, email=$5, title=$6 WHERE id=$7",
+                use(first_name),
+                use(last_name),
+                use(login),
+                useRef(hashed_password),
+                use(email),
+                use(title),
+                use(id);
+                range(0, 1);
+                update.execute();
+                
+                if (update.execute() > 0)
+                {
+                Poco::Data::Statement select(session);
+                select << "SELECT id, first_name, last_name, email, title, login, password FROM users WHERE id=$1",
+                into(update_user._id),
+                into(update_user._first_name),
+                into(update_user._last_name),
+                into(update_user._email),
+                into(update_user._title),
+                into(update_user._login),
+                into(update_user._password),
+                use(id),
+                range(0, 1);
+
+                select.execute();
+                if (rs.moveFirst()) return update_user;
+            }
+            
+            }
+            
+            
+        
+            
+
+            // Poco::Data::Session session = database::Database::get().create_session();
+            // Poco::Data::Statement update(session);
+            // User update_user;
+            // // Выборка данных пользователя перед удалением
+            // update << "UPDATE users SET first_name=$1, last_name=$2, login=$3, password=$4, email=$5, title=$6 WHERE id=$7",
+            // use(first_name),
+            // use(last_name),
+            // use(login),
+            // use(password),
+            // use(email),
+            // use(title),
+            // use(id);
+            // range(0, 1);
+            // update.execute();
+            
+            // if (update.execute() > 0)
+            // {
+            //     Poco::Data::Statement select(session);
+            // select << "SELECT id, first_name, last_name, email, title, login, password FROM users WHERE id=$1",
+            // into(update_user._id),
+            // into(update_user._first_name),
+            // into(update_user._last_name),
+            // into(update_user._email),
+            // into(update_user._title),
+            // into(update_user._login),
+            // into(update_user._password),
+            // use(id),
+            // range(0, 1);
+            // // Выполнение запроса SELECT
+            // select.execute();
+            // }
+            // return update_user;
+            
+        }  
+
+
+
+        catch (Poco::Data::PostgreSQL::ConnectionException &e)
+        {
+            std::cout << "connection:" << e.what() << std::endl;
+            throw;
+        }
+        catch (Poco::Data::PostgreSQL::StatementException &e)
+        {
+            std::cout << "statement:" << e.what() << std::endl;
+            throw;
+        }
+        return {};
+    }
+
+//          static std::optional<User> update_to_mysql(long id,std::string first_name,std::string last_name, 
+//      std::string login,std::string password,std::string email,std::string title)
+//     {
+
+//         try
+//         {
+//         Poco::Data::Session session = database::Database::get().create_session();
+//         Poco::Data::Statement update(session);
+//         User update_user;
+//  update << "UPDATE users SET first_name=$1, last_name=$2, title=$3, password=$4 WHERE id=$5",
+//     use(first_name),
+//     use(last_name),
+//     use(login),
+//     use(password),
+//     use(email),
+//     use(title),
+   
+//     use(id);
+//     range(0, 1);
+    
+
+//     update.execute();
+//     std::cout << " user with ID updated: " << id << std::endl;
+//     return update_user;
+//         }
+//         catch (Poco::Data::PostgreSQL::ConnectionException &e)
+//         {
+//             std::cout << "connection:" << e.what() << std::endl;
+//             throw;
+//         }
+//         catch (Poco::Data::PostgreSQL::StatementException &e)
+//         {
+
+//             std::cout << "statement:" << e.what() << std::endl;
+//             throw;
+//         }
+//     }
+
+     
+
+
+
+
+
 
     const std::string &User::get_login() const
     {

@@ -40,10 +40,25 @@ namespace database
 
             static void init();
             static std::optional<User> read_by_id(long id);
+            static std::optional<User> delete_by_id(long id);
             static std::optional<long> auth(std::string &login, std::string &password);
             static std::vector<User> read_all();
             static std::vector<User> search(std::string first_name,std::string last_name);
             void save_to_mysql();
+            
+            static std::optional<User> update_to_mysql(
+                long id, 
+                std::string first_name, 
+                std::string last_name,
+                std::string login, 
+                std::string password,
+                std::string email,
+                std::string title
+                
+                );
+            // std::string &first_name,std::string &last_name,
+            //     std::string &login,std::string &password,std::string &email,std::string &title
+            
 
             Poco::JSON::Object::Ptr toJSON() const;
 

@@ -1,17 +1,25 @@
 #include "config.h"
-
+#include <iostream>
 Config::Config()
 {
-        _host = std::getenv("DB_HOST");
-        _port = std::getenv("DB_PORT");
-        _login = std::getenv("DB_LOGIN");
-        _password = std::getenv("DB_PASSWORD");
-        _database = std::getenv("DB_DATABASE");
+    std::cout<<"Hellow world";
+         _host = std::getenv("DB_HOST");
+         _port = std::getenv("DB_PORT");
+         _login = std::getenv("DB_LOGIN");
+         _password = std::getenv("DB_PASSWORD");
+         _database = std::getenv("DB_DATABASE");
+        // _host = "localhost";
+        // _port = "5432";
+        // _login = "stud";
+        // _password = "stud";
+        // _database = "archdb";
+        
 }
 
 Config &Config::get()
 {
     static Config _instance;
+    
     return _instance;
 }
 
@@ -61,5 +69,6 @@ std::string &Config::password()
 
 std::string &Config::database()
 {
+    
     return _database;
 }

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.3)
 
 SET (EXAMPLE_BINARY "hl_mai_lab_01")
 
