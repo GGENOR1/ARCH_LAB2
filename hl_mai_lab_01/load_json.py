@@ -20,7 +20,6 @@ from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, 
 
 metadata = MetaData()
 
-# Создаем таблицу пользователей
 users_table = Table('users', metadata,
                     Column('id', Integer, primary_key=True),
                     Column('first_name', String(256), nullable=False),
