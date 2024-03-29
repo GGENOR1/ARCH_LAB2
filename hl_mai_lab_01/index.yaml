@@ -42,6 +42,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /search_by_login:
+    get:
+      summary: Поиск пользователей логину
+      parameters:
+      - name: login
+        description: Логин
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The users for the login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        404:
+          description: No user found for the login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /auth:
     get:
       summary: Проверка аутентификации
@@ -247,6 +277,9 @@ components:
     user_id:
       description: Уникальный идентификатор пользователя
       type: integer
+    login:
+      description: Логин пользователя
+      type: string
     users:
       type: array
       items:

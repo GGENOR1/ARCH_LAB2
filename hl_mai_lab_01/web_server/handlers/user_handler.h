@@ -158,6 +158,38 @@ public:
                     return;
                 }
             }
+            else if (form.has("login") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
+            {
+                std::string login = form.get("login").c_str();
+                std::cout<<login;
+
+                std::optional<database::User> result = database::User::search_by_login(login);
+                if (result)
+                {
+                    response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+                    response.setChunkedTransferEncoding(true);
+                    response.setContentType("application/json");
+                    std::ostream &ostr = response.send();
+                    Poco::JSON::Stringifier::stringify(remove_password(result->toJSON()), ostr);
+                    return;
+                }
+                else
+                {
+                    response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_NOT_FOUND);
+                    response.setChunkedTransferEncoding(true);
+                    response.setContentType("application/json");
+                    Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
+                    root->set("type", "/errors/not_found");
+                    root->set("title", "Internal exception");
+                    root->set("status", "404");
+                    root->set("detail", "user ot found");
+                    root->set("instance", "/user");
+                    std::ostream &ostr = response.send();
+                    Poco::JSON::Stringifier::stringify(root, ostr);
+                    return;
+                }
+            }
+
             else if (form.has("id") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_DELETE))
             {
                 long id = atol(form.get("id").c_str());
@@ -242,6 +274,22 @@ public:
 
                 return;
             }
+            // else if (hasSubstr(request.getURI(), "/search_by_login"))
+            // {
+
+            //     std::string lg = form.get("login");
+            //     auto results = database::User::search_by_login(lg);
+            //     Poco::JSON::Array arr;
+            //     for (auto s : results)
+            //         arr.add(remove_password(s.toJSON()));
+            //     response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+            //     response.setChunkedTransferEncoding(true);
+            //     response.setContentType("application/json");
+            //     std::ostream &ostr = response.send();
+            //     Poco::JSON::Stringifier::stringify(arr, ostr);
+
+            //     return;
+            // }
             else if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_POST)
             {
                 if (form.has("first_name") && form.has("last_name") && form.has("email") && form.has("title") && form.has("login") && form.has("password"))

@@ -44,6 +44,7 @@ namespace database
             static std::optional<long> auth(std::string &login, std::string &password);
             static std::vector<User> read_all();
             static std::vector<User> search(std::string first_name,std::string last_name);
+            static std::optional<User> search_by_login(std::string login);
             void save_to_mysql();
             
             static std::optional<User> update_to_mysql(
