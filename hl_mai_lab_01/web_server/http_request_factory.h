@@ -39,7 +39,7 @@ using Poco::Util::OptionCallback;
 using Poco::Util::HelpFormatter;
 
 #include "handlers/user_handler.h"
-
+#include "handlers/report_handler.h"
 
 class HTTPRequestFactory: public HTTPRequestHandlerFactory
 {
@@ -58,8 +58,18 @@ public:
             hasSubstr(request.getURI(),"/search") ||
             hasSubstr(request.getURI(),"/auth"))
             return new UserHandler(_format);
+        else 
+        if (hasSubstr(request.getURI(),"/order")||
+        hasSubstr(request.getURI(),"/orders")) 
+        return new PizzaHandler(_format);
+
+        // if (hasSubstr(request.getURI(),"/report")||
+        //     hasSubstr(request.getURI(),"/conferences")) 
+        //     return new PizzaHandler(_format);
         return 0;
     }
+
+    
 
 private:
     std::string _format;
