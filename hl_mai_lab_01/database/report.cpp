@@ -106,6 +106,19 @@ namespace database
         return result;
     }
 
+    std::optional<ReportInfo> ReportInfo::delete_by_id(long id)
+    {
+        std::optional<ReportInfo> result;
+        std::map<std::string,long> params;
+        params["id"] = id;
+        std::vector<std::string> results = database::Database::get().get_from_mongo("reports" ,params);
+
+        if(!results.empty())
+            result = fromJSON(results[0]);
+        
+        return result;
+    }
+
     std::vector<ReportInfo> ReportInfo::read_by_user_id(long user_id)
     {
         std::vector<ReportInfo> result;
@@ -124,6 +137,12 @@ namespace database
     void ReportInfo::add()
     {
         database::Database::get().send_to_mongo("reports",toJSON());
+    }
+    void ReportInfo::deletes()
+    {
+        std::map<std::string,long> params;
+        params["id"] = _id;       
+        database::Database::get().remove_from_mongo("reports",params);
     }
 
     void ReportInfo::update()

@@ -42,9 +42,11 @@ namespace database
             Description&     description();
 
             static std::optional<ReportInfo> read_by_id(long id);
+            static std::optional<ReportInfo> delete_by_id(long id);
             static std::vector<ReportInfo> read_by_user_id(long user_id);
             void   add();
             void   update();
+            void   deletes();
             Poco::JSON::Object::Ptr toJSON() const;
 
     };

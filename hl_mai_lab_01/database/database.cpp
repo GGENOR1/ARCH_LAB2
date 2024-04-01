@@ -198,4 +198,25 @@ namespace database
         }
         return result;
     }
+void Database::remove_from_mongo(const std::string &collection, std::map<std::string, long> &params)
+{
+    try
+    {
+        Poco::SharedPtr<Poco::MongoDB::DeleteRequest> request = database_mongo.createDeleteRequest(collection);
+        for (auto &[key, val] : params)
+            request->selector().add(key, val);
+        connection_mongo.sendRequest(*request);
+    }
+    catch (std::exception &ex)
+    {
+        std::cout << "mongodb exception: " << ex.what() << std::endl;
+        std::string lastError = database_mongo.getLastError(connection_mongo);
+        if (!lastError.empty())
+            std::cout << "mongodb Last Error: " << lastError << std::endl;
+    }
 }
+
+    
+}
+
+

@@ -7,7 +7,7 @@ servers:
   - url: http://localhost:8080
     description: Example server
 paths:
-  /reports:
+  /orders:
     get:
       summary: Чтение информации о докладе
       parameters:
@@ -23,7 +23,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/reports'
+                $ref: '#/components/schemas/orders'
         404:
           description: Пользователь не найден
           content:
@@ -36,7 +36,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /report:
+  /order:
     get:
       summary: Чтение информации о докладе
       parameters:
@@ -52,7 +52,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/report'
+                $ref: '#/components/schemas/order'
         404:
           description: Пользователь не найден
           content:
@@ -178,10 +178,40 @@ paths:
         required: true
         schema:
           type: string
-      
       responses:
         '200':
           description: Идентификатор, добавленного пользователя
+          content:
+            application/json:
+              schema:
+                type: integer
+        404:
+          description: Ошибка добавления пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Удаление доклада
+      parameters:
+      - name: id
+        description: Идентификатор доклада
+        in: query
+        required: true
+        schema:
+          type: integer
+          default: 1
+    
+      responses:
+        '200':
+          description: Идентификатор, удаленного пользователя
           content:
             application/json:
               schema:
@@ -203,11 +233,11 @@ components:
     id:
       description: Уникальный идентификатор
       type: integer
-    reports:
+    orders:
       type: array
       items:
-        $ref: '#/components/schemas/report'
-    report:
+        $ref: '#/components/schemas/order'
+    order:
       type: object
       properties:
         id:

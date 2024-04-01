@@ -59,7 +59,7 @@ public:
         HTMLForm form(request, request.stream());
         try
         {
-            if (hasSubstr(request.getURI(), "/reports") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
+            if (hasSubstr(request.getURI(), "/orders") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
             {
                 long id = atol(form.get("user_id").c_str());
                 auto results = database::ReportInfo::read_by_user_id(id);
@@ -74,7 +74,7 @@ public:
 
                 return;
             }
-            else if (hasSubstr(request.getURI(), "/report") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
+            else if (hasSubstr(request.getURI(), "/order") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
             {
                 long id = atol(form.get("id").c_str());
 
@@ -126,6 +126,20 @@ public:
                 ostr << order.get_id();
                 return;
             }
+
+            else if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_DELETE)
+            {
+                database::ReportInfo order;
+                order.id() = atol(form.get("id").c_str());
+                order.deletes();
+                response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+                response.setChunkedTransferEncoding(true);
+                response.setContentType("application/json");
+                std::ostream &ostr = response.send();
+                ostr << order.get_id();
+                return;
+            }
+            
             else if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_PUT)
             {
                 database::ReportInfo order;
