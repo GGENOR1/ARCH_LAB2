@@ -2,30 +2,30 @@ openapi: '3.0.0'
 info:
   version: '1.0.0'
   title: 'Arch Lab Example API'
-  description: Пример API для первого домашнего задания по курсу Архитектура программных систем
+  description: API для конференций
 servers:
   - url: http://localhost:8080
     description: Example server
 paths:
-  /orders:
-    get:
-      summary: Чтение информации о докладе
+  /reporttoconf:
+    get:   
+      summary: Вывод докладов в конференции
       parameters:
-      - name: user_id
-        description: Уникальный идентификатор пользователя
+      - name: id
+        description: Уникальный идентификатор конференции
         in: query
         required: false
         schema:
           $ref: '#/components/schemas/id'
       responses:
         '200':
-          description: Найденный пользователь
+          description: Найденные доклады в конференции
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/orders'
+                $ref: '#/components/schemas/conferences'
         404:
-          description: Пользователь не найден
+          description: Конференция не найдена
           content:
             application/json:
               schema:
@@ -36,25 +36,89 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /order:
+  /conferences:
     get:
-      summary: Чтение информации о докладе
+      summary: Чтение информации о конференции
       parameters:
-      - name: id
-        description: Уникальный идентификатор доклада
+      - name: user_id
+        description: Уникальный идентификатор конференции
         in: query
         required: false
         schema:
           $ref: '#/components/schemas/id'
       responses:
         '200':
-          description: Найденный пользователь
+          description: Найденная конференция
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/order'
+                $ref: '#/components/schemas/conferences'
         404:
-          description: Пользователь не найден
+          description: Конференция не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Добавление доклада в конференцию
+      parameters:
+      - name: id
+        description: Уникальный идентификатор конференции
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/id'
+      - name: talks
+        description: Идентификатор доклада
+        in: query
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Добавленный доклад
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conference'
+        404:
+          description: Конференция не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /conference:
+    get:
+      summary: Чтение информации о конференции
+      parameters:
+      - name: id
+        description: Уникальный идентификатор конференции
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/id'
+      responses:
+        '200':
+          description: Найденная конференция
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conference'
+        404:
+          description: Конференция не найдена
           content:
             application/json:
               schema:
@@ -66,7 +130,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     put:
-      summary: Обновление информации о докладе
+      summary: Обновление информации о конференции
       parameters:
       - name: id
         description: Идентификатор доклада
@@ -82,20 +146,21 @@ paths:
         schema:
           type: integer
           default: 1
-      - name: type
-        description: Тип доклада
+      - name: title
+        description: Описание конференции
         in: query
         required: true
         schema:
           type: string
-      - name: rate
-        description: Рейтинг доклада 
+      - name: type
+        description: Тип конференции
         in: query
         required: true
         schema:
-          type: integer
-      - name: name
-        description: Название доклада
+          type: string
+
+      - name: location
+        description: Локация
         in: query
         required: true
         schema:
@@ -106,6 +171,18 @@ paths:
         required: true
         schema:
           type: string
+      - name: date
+        description: Дата
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: talks
+        description: Уникальный идентификатор доклада
+        in: query
+        required: true
+        schema:
+          type: integer
       - name: topic
         description: Ключевые слова
         in: query
@@ -114,13 +191,13 @@ paths:
           type: string
       responses:
         '200':
-          description: Идентификатор, добавленного пользователя
+          description: Идентификатор обновленной конференции
           content:
             application/json:
               schema:
                 type: integer
         404:
-          description: Ошибка добавления пользователя
+          description: Ошибка обновления конференции
           content:
             application/json:
               schema:
@@ -132,10 +209,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
-      summary: Добавление нового доклада
+      summary: Добавление новой конференции
       parameters:
       - name: id
-        description: Идентификатор доклада
+        description: Идентификатор конференции
         in: query
         required: true
         schema:
@@ -148,20 +225,21 @@ paths:
         schema:
           type: integer
           default: 1
-      - name: type
-        description: Тип доклада
+      - name: title
+        description: Описание конференции
         in: query
         required: true
         schema:
           type: string
-      - name: rate
-        description: Рейтинг доклада 
+      - name: type
+        description: Тип конференции
         in: query
         required: true
         schema:
-          type: integer
-      - name: name
-        description: Название доклада
+          type: string
+
+      - name: location
+        description: Локация
         in: query
         required: true
         schema:
@@ -172,6 +250,18 @@ paths:
         required: true
         schema:
           type: string
+      - name: date
+        description: Дата
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: talks
+        description: Уникальный идентификатор доклада
+        in: query
+        required: true
+        schema:
+          type: integer
       - name: topic
         description: Ключевые слова
         in: query
@@ -180,13 +270,13 @@ paths:
           type: string
       responses:
         '200':
-          description: Идентификатор, добавленного пользователя
+          description: Идентификатор созданной конференции
           content:
             application/json:
               schema:
                 type: integer
         404:
-          description: Ошибка добавления пользователя
+          description: Ошибка добавления конференции
           content:
             application/json:
               schema:
@@ -199,10 +289,10 @@ paths:
                 $ref: '#/components/schemas/Error'
 
     delete:
-      summary: Удаление доклада
+      summary: Удаление конференции
       parameters:
       - name: id
-        description: Идентификатор доклада
+        description: Идентификатор конференции
         in: query
         required: true
         schema:
@@ -211,13 +301,13 @@ paths:
     
       responses:
         '200':
-          description: Идентификатор, удаленного пользователя
+          description: Идентификатор, удаленной конференции
           content:
             application/json:
               schema:
                 type: integer
         404:
-          description: Ошибка добавления пользователя
+          description: Ошибка добавления конференции
           content:
             application/json:
               schema:
@@ -233,23 +323,25 @@ components:
     id:
       description: Уникальный идентификатор
       type: integer
-    orders:
+    conferences:
       type: array
       items:
-        $ref: '#/components/schemas/order'
-    order:
+        $ref: '#/components/schemas/conference'
+    conference:
       type: object
       properties:
         id:
           type: integer
         user_id:
           type: integer
+        title:
+          type: string
         type:
           type: string
-        name:
+        location:
           type: string
-        rate:
-          type: integer
+        date:
+          type: string
         description:
           type: object
           properties:
@@ -257,6 +349,8 @@ components:
               type: string
             descriptions:
               type: string
+        talks:
+          type: array
 
 
     Error:

@@ -36,8 +36,10 @@ namespace database{
             void send_to_mongo(const std::string& collection,Poco::JSON::Object::Ptr json);
             void update_mongo(const std::string& collection,std::map<std::string,long>& params,Poco::JSON::Object::Ptr json);
             std::vector<std::string> get_from_mongo(const std::string& collection,std::map<std::string,long>& params);
+            std::vector<std::string> get_from_mongo2(const std::string& collection,std::map<std::string,long>& params);
             long count_from_mongo(const std::string& collection,std::map<std::string,long>& params);
             void remove_from_mongo(const std::string& collection,std::map<std::string,long>& params);
+            std::vector<std::string> get_all_from_mongo();
             //void delete_from_mongo_by_id(const std::string& collection,std::map<std::string,long>& params,Poco::JSON::Object::Ptr json);
     };
 }

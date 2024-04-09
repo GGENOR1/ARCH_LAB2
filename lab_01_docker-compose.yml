@@ -22,9 +22,9 @@ services:
       - 8080:8080
     networks:
       - lab02-network
-  lab_02_pizza:
+  lab_02_reports:
     tty: true
-    container_name: lab_02_pizza
+    container_name: lab_02_reports
     build:
       context: .
       dockerfile: lab_02_dockerfile
@@ -42,6 +42,29 @@ services:
         condition: service_healthy
     ports:
       - 8081:8080
+    networks:
+      - lab02-network
+    
+  lab_02_conference:
+    tty: true
+    container_name: lab_02_conference
+    build:
+      context: .
+      dockerfile: lab_02_dockerfile
+    environment:
+      - DB_HOST=lab02_postgres
+      - DB_PORT=5432
+      - DB_LOGIN=stud
+      - DB_PASSWORD=stud
+      - DB_DATABASE=archdb
+      - MONGO_HOST=mongodb_lab2
+      - MONGO_PORT=27017
+      - MONGO_DATABASE=arch
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 8082:8080
     networks:
       - lab02-network
 

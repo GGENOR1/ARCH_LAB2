@@ -198,6 +198,61 @@ namespace database
         }
         return result;
     }
+
+
+        std::vector<std::string> Database::get_from_mongo2([[maybe_unused]] const std::string &collection, [[maybe_unused]] std::map<std::string, long> &params)
+    {
+       std::vector<std::string> result;
+
+        try
+        {
+
+            Poco::MongoDB::QueryRequest request("arch.conference");
+            Poco::MongoDB::ResponseMessage response;
+            for (auto &[key, val] : params)
+                request.selector().add(key, val);
+            connection_mongo.sendRequest(request, response);
+
+            for (auto doc : response.documents())
+                result.push_back(doc->toString());
+        }
+        catch (std::exception &ex)
+        {
+            std::cout << "mongodb exception: " << ex.what() << std::endl;
+            std::string lastError = database_mongo.getLastError(connection_mongo);
+            if (!lastError.empty())
+                std::cout << "mongodb Last Error: " << lastError << std::endl;
+        }
+        return result;
+    }
+
+    std::vector<std::string> Database::get_all_from_mongo()
+{
+    std::vector<std::string> result;
+
+    try
+    {
+        Poco::MongoDB::QueryRequest request("arch.reports");
+        Poco::MongoDB::ResponseMessage response;
+        connection_mongo.sendRequest(request, response);
+
+        for (auto doc : response.documents())
+        {
+            std::cout<<"ТУТ ДОКУМЕНТ ПОЛУЧАЕМ"<<doc<<std::endl;
+            result.push_back(doc->toString());
+        }
+    }
+    catch (std::exception &ex)
+    {
+        std::cout << "mongodb exception: " << ex.what() << std::endl;
+        std::string lastError = database_mongo.getLastError(connection_mongo);
+        if (!lastError.empty())
+            std::cout << "mongodb Last Error: " << lastError << std::endl;
+    }
+
+    return result;
+}
+
 void Database::remove_from_mongo(const std::string &collection, std::map<std::string, long> &params)
 {
     try
@@ -215,6 +270,8 @@ void Database::remove_from_mongo(const std::string &collection, std::map<std::st
             std::cout << "mongodb Last Error: " << lastError << std::endl;
     }
 }
+
+
 
     
 }

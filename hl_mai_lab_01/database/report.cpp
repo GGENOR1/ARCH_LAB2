@@ -24,7 +24,7 @@ namespace database
         Poco::Dynamic::Var result = parser.parse(s1+s2);
         Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
 
-        report.id() = object->getValue<long>("user_id");
+        report.id() = object->getValue<long>("id");
         report.user_id() = object->getValue<long>("user_id");
         report.type() = object->getValue<std::string>("type");
         report.rate() = object->getValue<long>("rate");
@@ -132,6 +132,21 @@ namespace database
         
 
         return result;
+    }
+
+    std::vector<ReportInfo> ReportInfo::read_all_reports()
+    {   
+    std::vector<ReportInfo> results;
+    std::vector<std::string> allResults = database::Database::get().get_all_from_mongo();
+
+    for (const auto& result : allResults) {
+        std::optional<ReportInfo> report = fromJSON(result);
+        if (report) {
+            results.push_back(*report);
+        }
+    }
+
+    return results;
     }
 
     void ReportInfo::add()

@@ -40,7 +40,7 @@ using Poco::Util::HelpFormatter;
 
 #include "handlers/user_handler.h"
 #include "handlers/report_handler.h"
-
+#include "handlers/conference_handler.h"
 class HTTPRequestFactory: public HTTPRequestHandlerFactory
 {
 public:
@@ -58,14 +58,20 @@ public:
             hasSubstr(request.getURI(),"/search") ||
             hasSubstr(request.getURI(),"/auth"))
             return new UserHandler(_format);
-        else 
-        if (hasSubstr(request.getURI(),"/order")||
-        hasSubstr(request.getURI(),"/orders")) 
+        else if (hasSubstr(request.getURI(),"/order")||
+        hasSubstr(request.getURI(),"/orders") ||
+        hasSubstr(request.getURI(),"/orall")) 
+        {
+        std::cout<<"Тут проходит orders";
         return new PizzaHandler(_format);
+        }
 
-        // if (hasSubstr(request.getURI(),"/report")||
-        //     hasSubstr(request.getURI(),"/conferences")) 
-        //     return new PizzaHandler(_format);
+        else if  (hasSubstr(request.getURI(),"/conference")||
+        hasSubstr(request.getURI(),"/conferences") ||
+        hasSubstr(request.getURI(),"/reporttoconf"))
+        {
+            std::cout<<"Тут проходит conferencessaaaaaaaaaaaaaaaaaaaa"<<std::endl;
+            return new ConferenceHandler(_format);}
         return 0;
     }
 

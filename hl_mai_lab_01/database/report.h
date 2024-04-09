@@ -44,10 +44,15 @@ namespace database
             static std::optional<ReportInfo> read_by_id(long id);
             static std::optional<ReportInfo> delete_by_id(long id);
             static std::vector<ReportInfo> read_by_user_id(long user_id);
+            static std::vector<ReportInfo> read_all_reports();
+
+            //static std::vector<ReportInfo>read_by_reports(long id);
+            
             void   add();
             void   update();
             void   deletes();
             Poco::JSON::Object::Ptr toJSON() const;
+            //Poco::JSON::Object::Ptr testtoJSON2(const std::string &str, long id) const;
 
     };
 }

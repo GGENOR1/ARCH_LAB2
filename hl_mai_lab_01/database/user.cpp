@@ -160,7 +160,7 @@ namespace database
             Poco::Data::Session session = database::Database::get().create_session();
             Poco::Data::Statement select(session);
             User removed_user;
-            // Выборка данных пользователя перед удалением
+    
             select << "SELECT id, first_name, last_name, email, title, login, password FROM users WHERE id=$1",
             into(removed_user._id),
             into(removed_user._first_name),
@@ -459,39 +459,7 @@ namespace database
         
             
 
-            // Poco::Data::Session session = database::Database::get().create_session();
-            // Poco::Data::Statement update(session);
-            // User update_user;
-            // // Выборка данных пользователя перед удалением
-            // update << "UPDATE users SET first_name=$1, last_name=$2, login=$3, password=$4, email=$5, title=$6 WHERE id=$7",
-            // use(first_name),
-            // use(last_name),
-            // use(login),
-            // use(password),
-            // use(email),
-            // use(title),
-            // use(id);
-            // range(0, 1);
-            // update.execute();
-            
-            // if (update.execute() > 0)
-            // {
-            //     Poco::Data::Statement select(session);
-            // select << "SELECT id, first_name, last_name, email, title, login, password FROM users WHERE id=$1",
-            // into(update_user._id),
-            // into(update_user._first_name),
-            // into(update_user._last_name),
-            // into(update_user._email),
-            // into(update_user._title),
-            // into(update_user._login),
-            // into(update_user._password),
-            // use(id),
-            // range(0, 1);
-            // // Выполнение запроса SELECT
-            // select.execute();
-            // }
-            // return update_user;
-            
+        
         }  
 
 
@@ -509,43 +477,7 @@ namespace database
         return {};
     }
 
-//          static std::optional<User> update_to_mysql(long id,std::string first_name,std::string last_name, 
-//      std::string login,std::string password,std::string email,std::string title)
-//     {
 
-//         try
-//         {
-//         Poco::Data::Session session = database::Database::get().create_session();
-//         Poco::Data::Statement update(session);
-//         User update_user;
-//  update << "UPDATE users SET first_name=$1, last_name=$2, title=$3, password=$4 WHERE id=$5",
-//     use(first_name),
-//     use(last_name),
-//     use(login),
-//     use(password),
-//     use(email),
-//     use(title),
-   
-//     use(id);
-//     range(0, 1);
-    
-
-//     update.execute();
-//     std::cout << " user with ID updated: " << id << std::endl;
-//     return update_user;
-//         }
-//         catch (Poco::Data::PostgreSQL::ConnectionException &e)
-//         {
-//             std::cout << "connection:" << e.what() << std::endl;
-//             throw;
-//         }
-//         catch (Poco::Data::PostgreSQL::StatementException &e)
-//         {
-
-//             std::cout << "statement:" << e.what() << std::endl;
-//             throw;
-//         }
-//     }
 
      
 

@@ -74,6 +74,24 @@ public:
 
                 return;
             }
+
+
+            else if (hasSubstr(request.getURI(), "/orall") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
+            {
+
+                auto results = database::ReportInfo::read_all_reports();
+                Poco::JSON::Array arr;
+                for (auto s : results)
+                    arr.add(s.toJSON());
+                response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+                response.setChunkedTransferEncoding(true);
+                response.setContentType("application/json");
+                std::ostream &ostr = response.send();
+                Poco::JSON::Stringifier::stringify(arr, ostr);
+
+                return;
+            }
+
             else if (hasSubstr(request.getURI(), "/order") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
             {
                 long id = atol(form.get("id").c_str());
