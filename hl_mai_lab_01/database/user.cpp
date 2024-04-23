@@ -92,16 +92,37 @@ namespace database
             Poco::Data::Session session = database::Database::get().create_session();
             Poco::Data::Statement select(session);
             long id;
+        unsigned char hash[SHA256_DIGEST_LENGTH];
+        EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+        const EVP_MD *md = EVP_sha256();
+
+        EVP_DigestInit_ex(mdctx, md, NULL);
+        EVP_DigestUpdate(mdctx, password.c_str(), password.length());
+        EVP_DigestFinal_ex(mdctx, hash, NULL);
+        EVP_MD_CTX_free(mdctx);
+
+        // и переводим в шестнадцатеричный формат
+        std::stringstream ss;
+        for(int i = 0; i < SHA256_DIGEST_LENGTH; ++i)
+        {
+            ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+        }
+        std::string hashed_password = ss.str();
+
             select << "SELECT id FROM users where login=$1 and password=$2",
                 into(id),
                 use(login),
-                use(password),
+                use(hashed_password),
                 range(0, 1); //  iterate over result set one row at a time
 
             select.execute();
             Poco::Data::RecordSet rs(select);
             if (rs.moveFirst())
-                return id;
+                {
+                    std::cout<<"В авторизации получаем id"<<id<<std::endl;
+                    return id;
+                }
+                
         }
 
         catch (Poco::Data::PostgreSQL::ConnectionException &e)

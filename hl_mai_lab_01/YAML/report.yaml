@@ -290,8 +290,9 @@ components:
           description: Сообщение о ошибке
           type: string
   securitySchemes:
-      basicAuth:     
-        type: http
-        scheme: basic
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 security:
-  - basicAuth: []
+  - bearerAuth: []

@@ -158,6 +158,8 @@ public:
                     return;
                 }
             }
+
+
             else if (form.has("login") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
             {
                 std::string login = form.get("login").c_str();
@@ -231,10 +233,14 @@ public:
                 std::string login, password;
                 if (scheme == "Basic")
                 {
+                    std::cout<<"Схема "<<"Basic"<<std::endl;
                     get_identity(info, login, password);
+                    std::cout<<"тут вополняется"<<std::endl;
                     if (auto id = database::User::auth(login, password))
                     {
+                        
                         std::string token = generate_token(*id,login);
+                        std::cout<<"token"<<token<<std::endl;
                         response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
                         response.setChunkedTransferEncoding(true);
                         response.setContentType("application/json");

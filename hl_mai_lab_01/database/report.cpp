@@ -13,7 +13,7 @@ namespace database
         int start = str.find("_id");
         int end = str.find(",",start);
 
-        std::string s1 = str.substr(0,start-1);
+        std::string s1 = str.substr(0, start-1);
         std::string s2 = str.substr(end+1);
 
         std::cout << s1 << s2 << std::endl;

@@ -18,12 +18,15 @@ bool get_identity(const std::string identity, std::string &login, std::string &p
 
     size_t pos = decoded.find(':');
     login = decoded.substr(0, pos);
+    std::cout<<"login "<<login<<std::endl;
     password = decoded.substr(pos + 1);
+    std::cout<<"password "<<password<<std::endl;
     return true;
 }
 
 std::string getJWTKey() {
     if (std::getenv("JWT_KEY") != nullptr) {
+        std::cout << "key loaded" << std::endl;
         return std::getenv("JWT_KEY");
     }
     return "0123456789ABCDEF0123456789ABCDEF";
