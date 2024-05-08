@@ -1,21 +1,26 @@
 #include "config.h"
-#include <iostream>
+
 Config::Config()
 {
-    _host = std::getenv("DB_HOST");
-    _port = std::getenv("DB_PORT");
-    _login = std::getenv("DB_LOGIN");
-    _password = std::getenv("DB_PASSWORD");
-    _database = std::getenv("DB_DATABASE");
-    _mongo = std::getenv("MONGO_HOST");
-    _mongo_port = std::getenv("MONGO_PORT");
-    _mongo_database = std::getenv("MONGO_DATABASE");
-        // _host = "localhost";
-        // _port = "5432";
-        // _login = "stud";
-        // _password = "stud";
-        // _database = "archdb";
-        
+        _host = std::getenv("DB_HOST");
+        _port = std::getenv("DB_PORT");
+        _login = std::getenv("DB_LOGIN");
+        _password = std::getenv("DB_PASSWORD");
+        _database = std::getenv("DB_DATABASE");
+        _mongo = std::getenv("MONGO_HOST");
+        _mongo_port = std::getenv("MONGO_PORT");
+        _mongo_database = std::getenv("MONGO_DATABASE");
+        _cache_servers = std::getenv("CACHE");
+}
+
+const std::string &Config::get_cache_servers() const
+{
+    return _cache_servers;
+}
+
+std::string &Config::cache_servers()
+{
+    return _cache_servers;
 }
 
 std::string& Config::mongo(){

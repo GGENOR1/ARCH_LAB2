@@ -4,7 +4,7 @@ info:
   title: 'Arch Lab Example API'
   description: API для конференций
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8888
     description: Example server
 paths:
   /reporttoconf:

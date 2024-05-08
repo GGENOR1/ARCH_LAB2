@@ -4,7 +4,7 @@ info:
   title: 'Arch Lab Example API'
   description: API для докладов
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8888
     description: Example server
 paths:
   /orall:
@@ -294,5 +294,9 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    basicAuth:     
+      type: http
+      scheme: basic
 security:
   - bearerAuth: []
+  - basicAuth: []

@@ -15,6 +15,7 @@ services:
       - MONGO_HOST=mongodb_lab2
       - MONGO_PORT=27017
       - MONGO_DATABASE=arch
+      - CACHE=cache_lab4:6379
     depends_on:
       db:
         condition: service_healthy
@@ -22,6 +23,7 @@ services:
       - 8080:8080
     networks:
       - lab02-network
+
   lab_02_reports:
     tty: true
     container_name: lab_02_reports
@@ -37,6 +39,7 @@ services:
       - MONGO_HOST=mongodb_lab2
       - MONGO_PORT=27017
       - MONGO_DATABASE=arch
+      - CACHE=cache_lab4:6379
     depends_on:
       db:
         condition: service_healthy
@@ -60,6 +63,7 @@ services:
       - MONGO_HOST=mongodb_lab2
       - MONGO_PORT=27017
       - MONGO_DATABASE=arch
+      - CACHE=cache_lab4:6379
     depends_on:
       db:
         condition: service_healthy
@@ -88,6 +92,31 @@ services:
       retries: 5
     networks:
       - lab02-network
+  
+  lab_04_gateway:
+    tty: true
+    container_name: lab_04_gateway
+    build:
+      context: .
+      dockerfile: lab_04_gateway_dockerfile
+    environment:
+      - DB_HOST=lab04_postgres
+      - DB_PORT=5432
+      - DB_LOGIN=stud
+      - DB_PASSWORD=stud
+      - DB_DATABASE=archdb
+      - MONGO_HOST=mongodb_lab4
+      - MONGO_PORT=27017
+      - MONGO_DATABASE=arch
+      - JWT_KEY=0123456789ABCDEF0123456789ABCDEF
+      - CACHE=cache_lab4:6379
+      - USER_ADDRESS=http://lab_02_user:8080
+      - DATA_ADDRESS=http://lab_02_reports:8080
+    ports:
+      - 8888:8888
+    networks:
+      - lab02-network
+      
   mongodb_lab2:
     image: mongo:5.0
     container_name: mongodb_lab2
@@ -102,10 +131,23 @@ services:
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
 
+  cache_lab4:
+    container_name: cache_lab4
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning 
+    networks:
+      - lab02-network
+    volumes: 
+      - lab04_cache:/data
+
 volumes:
   lab02_db:
   mongodbdata_lab2:
-
+  lab04_cache:
+  
 
 networks:
   lab02-network:

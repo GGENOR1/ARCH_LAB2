@@ -71,6 +71,29 @@ public:
         HTMLForm form(request, request.stream());
         try
         {
+            std::string scheme;
+            std::string info;
+            long id {-1};
+            std::string login;
+            request.getCredentials(scheme, info);
+            std::cout << "scheme: " << scheme << " identity: " << info << std::endl;
+            if(scheme == "Bearer") {
+                if(!extract_payload(info,id,login)) {
+                    response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_FORBIDDEN);
+                    response.setChunkedTransferEncoding(true);
+                    response.setContentType("application/json");
+                    Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
+                    root->set("type", "/errors/not_authorized");
+                    root->set("title", "Internal exception");
+                    root->set("status", "403");
+                    root->set("detail", "user not authorized");
+                    root->set("instance", "/pizza_order");
+                    std::ostream &ostr = response.send();
+                    Poco::JSON::Stringifier::stringify(root, ostr);
+                    return;                   
+                }
+            }
+            std::cout << "id:" << id << " login:" << login << std::endl;
             if (hasSubstr(request.getURI(), "/conferences") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
             {
                 long id = atol(form.get("user_id").c_str());

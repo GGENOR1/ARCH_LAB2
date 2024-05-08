@@ -240,12 +240,13 @@ public:
                     {
                         
                         std::string token = generate_token(*id,login);
-                        std::cout<<"token"<<token<<std::endl;
+                        std::cout<<"token: "<<token<<std::endl;
                         response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
                         response.setChunkedTransferEncoding(true);
                         response.setContentType("application/json");
                         std::ostream &ostr = response.send();
-                        ostr << "{ \"id\" : \"" << *id << "\", \"Token\" : \""<< token <<"\"}" << std::endl;
+                        ostr <<token;
+                        ostr.flush();
                         return;
                     }
                 }

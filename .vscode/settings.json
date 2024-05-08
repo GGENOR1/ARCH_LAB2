@@ -67,6 +67,16 @@
         "mutex": "cpp",
         "semaphore": "cpp",
         "stop_token": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "csignal": "cpp",
+        "any": "cpp",
+        "bitset": "cpp",
+        "codecvt": "cpp",
+        "complex": "cpp",
+        "coroutine": "cpp",
+        "forward_list": "cpp",
+        "source_location": "cpp",
+        "future": "cpp",
+        "typeindex": "cpp"
     }
 }

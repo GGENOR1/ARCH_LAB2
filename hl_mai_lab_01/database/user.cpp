@@ -119,7 +119,7 @@ namespace database
             Poco::Data::RecordSet rs(select);
             if (rs.moveFirst())
                 {
-                    std::cout<<"В авторизации получаем id"<<id<<std::endl;
+                    std::cout<<"В авторизации получаем id (user.cpp): "<<id<<std::endl;
                     return id;
                 }
                 

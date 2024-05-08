@@ -64,7 +64,7 @@ public:
             long id {-1};
             std::string login;
             request.getCredentials(scheme, info);
-            std::cout << "scheme: " << scheme << " identity: " << info << std::endl;
+            std::cout <<"Тут такое(report_handler.h): "<< "scheme: " << scheme << " identity: " << info << std::endl;
             if(scheme == "Bearer") {
                 if(!extract_payload(info,id,login)) {
                     response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_FORBIDDEN);

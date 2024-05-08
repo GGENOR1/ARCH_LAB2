@@ -52,6 +52,7 @@ bool extract_payload(std::string &jwt_token, long &id, std::string &login) {
     Poco::JWT::Signer signer(getJWTKey());
     try {
         Poco::JWT::Token token = signer.verify(jwt_token);
+        std::cout << token.getId() << std::endl;
         if (token.payload().has("login") && token.payload().has("id")) {
             login = token.payload().getValue<std::string>("login");
             id = token.payload().getValue<long>("id");
