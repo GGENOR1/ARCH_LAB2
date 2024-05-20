@@ -63,7 +63,7 @@ public:
         hasSubstr(request.getURI(),"/orall")) 
         {
         std::cout<<"Тут проходит orders(http_request_factory)"<<std::endl;
-        return new PizzaHandler(_format);
+        return new RequestHandler(_format);
         }
 
         else if  (hasSubstr(request.getURI(),"/conference")||

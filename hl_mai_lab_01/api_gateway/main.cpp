@@ -46,6 +46,7 @@ using Poco::Util::OptionCallback;
 using Poco::Util::OptionSet;
 using Poco::Util::ServerApplication;
 
+#include "CircuitBreaker.h"
 #include "../database/cache.h"
 /**
  * @brief Обработчик запросов на проксирование API
@@ -92,6 +93,7 @@ protected:
             request.setContentType("application/json");
             request.setContentLength(body.length());
             session.sendRequest(request) << body;
+            std::cout<<body<<std::endl;
 
             if (!basic_auth.empty())
             {
@@ -126,6 +128,8 @@ public:
     void handleRequest(HTTPServerRequest &request,
                        [[maybe_unused]] HTTPServerResponse &response)
     {
+        static CircuitBreaker circuit_breaker;
+
         std::cout << std::endl << "# api gateway start handle request" << std::endl;
         std::string base_url_user = "http://localhost:8080";
         std::string base_url_data = "http://localhost:8080";
@@ -134,59 +138,77 @@ public:
         if(std::getenv("DATA_ADDRESS")) base_url_data = std::getenv("DATA_ADDRESS");
         
         std::string scheme;
-        
         std::string info;
-
         request.getCredentials(scheme, info);
-        std::cout << "# api gateway - scheme: " << scheme << " identity: " << info << std::endl;
- 
+        //std::cout << "# api gateway - scheme: " << scheme << " identity: " << info << std::endl;
+
         std::string login, password;
         if (scheme == "Basic")
         {
-            if(request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET) {
-                std::string cache_result = get_cached(request.getMethod(), base_url_data, request.getURI(),info);
-                if(!cache_result.empty())
-                {
-                    std::cout << "# api gateway - from cache : " << cache_result << std::endl;
-                    response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-                    response.setChunkedTransferEncoding(true);
-                    response.setContentType("application/json");
-                    std::ostream &ostr = response.send();
-                    ostr << cache_result;
-                    ostr.flush();
-                    return;
-                }
-            }
 
-            std::cout << "# тут вызывается перет отправкой запроса 2" << std::endl;
             std::string token = get_request(Poco::Net::HTTPRequest::HTTP_GET,base_url_user, "/auth", info, "","");
-            std::cout << "# api gateway - auth :" << token << std::endl;
+            std::cout<<"Token: " << token<<std::endl;
+            //std::cout << "# api gateway - auth :" << token << std::endl;
             if (!token.empty())
             {
-                    std::string real_result = get_request(request.getMethod(), base_url_data, request.getURI(), "", token,"");
-                    std::cout << "# api gateway - result: " << std::endl
-                              << real_result << std::endl;
+                    std::string service_name{"http://localhost:8080"};
+                    if(circuit_breaker.check(service_name)) {
+                        std::cout << "# api gateway - request from service" << std::endl;
+                        std::string real_result = get_request(request.getMethod(), base_url_data, request.getURI(), "", token,"");
+                        //std::cout << "# api gateway - result: " << std::endl << real_result << std::endl;
 
-                    if(!real_result.empty()){
-                        response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-                        response.setChunkedTransferEncoding(true);
-                        response.setContentType("application/json");
-                        std::ostream &ostr = response.send();
-                        ostr << real_result;
-                        ostr.flush();
-                        put_cache(request.getMethod(), base_url_data, request.getURI(),info,real_result);
+                        if(!real_result.empty()){
+                            response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+                            response.setChunkedTransferEncoding(true);
+                            response.setContentType("application/json");
+                            std::ostream &ostr = response.send();
+                            ostr << real_result;
+                            ostr.flush();
+                            circuit_breaker.success(service_name);
+                            put_cache(request.getMethod(), base_url_data, request.getURI(),info,real_result);
+                        } else {
+                            response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_UNAUTHORIZED);
+                            response.setChunkedTransferEncoding(true);
+                            response.setContentType("application/json");
+                            Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
+                            root->set("type", "/errors/unauthorized");
+                            root->set("title", "Internal exception");
+                            root->set("status", "401");
+                            root->set("detail", "not authorized");
+                            root->set("instance", "/auth");
+                            std::ostream &ostr = response.send();
+                            Poco::JSON::Stringifier::stringify(root, ostr);
+                            circuit_breaker.fail(service_name);
+                        }
                     } else {
-                        response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_UNAUTHORIZED);
-                        response.setChunkedTransferEncoding(true);
-                        response.setContentType("application/json");
-                        Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
-                        root->set("type", "/errors/unauthorized");
-                        root->set("title", "Internal exception");
-                        root->set("status", "401");
-                        root->set("detail", "not authorized");
-                        root->set("instance", "/auth");
-                        std::ostream &ostr = response.send();
-                        Poco::JSON::Stringifier::stringify(root, ostr);
+                            std::cout << "# api gateway - request from cache" << std::endl;
+                            if(request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET) {
+                                std::string cache_result = get_cached(request.getMethod(), base_url_data, request.getURI(),info);
+                                if(!cache_result.empty()){
+                                    std::cout << "# api gateway - from cache : " << cache_result << std::endl;
+                                    response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+                                    response.setChunkedTransferEncoding(true);
+                                    response.setContentType("application/json");
+                                    std::ostream &ostr = response.send();
+                                    ostr << cache_result;
+                                    ostr.flush();
+                                    return;
+                                }
+                            }
+
+                            std::cout << "# api gateway - fail to request from cache" << std::endl;
+
+                            response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_SERVICE_UNAVAILABLE);
+                            response.setChunkedTransferEncoding(true);
+                            response.setContentType("application/json");
+                            Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
+                            root->set("type", "/errors/unavailable");
+                            root->set("title", "Service unavailable");
+                            root->set("status", "503");
+                            root->set("detail", "circuit breaker open");
+                            root->set("instance", request.getURI());
+                            std::ostream &ostr = response.send();
+                            Poco::JSON::Stringifier::stringify(root, ostr);                       
                     }
             }
         }

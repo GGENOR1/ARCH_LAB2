@@ -30,8 +30,8 @@ local body = ''
 local headers = {}
 headers["Content-Type"] = "application/json"
 
-local username = "admin1"  
-local password = "admin1"  
+local username = "admin"  
+local password = "admin"  
 local auth = username .. ":" .. password
 local auth_base64 = base64_encode(auth)
 
@@ -69,7 +69,7 @@ function all_order_request()
     return wrk.format("GET", "/report", headers, body)
 end
 request = function()
-    local requests = {conf_request} 
+    local requests = {order_request} 
     local chosen_request = requests[math.random(1, #requests)]
     return chosen_request()
 end

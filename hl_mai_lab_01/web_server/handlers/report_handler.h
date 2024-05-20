@@ -45,11 +45,11 @@ using Poco::Util::ServerApplication;
 #include "../../database/report.h"
 #include "../../helper.h"
 
-class PizzaHandler : public HTTPRequestHandler
+class RequestHandler : public HTTPRequestHandler
 {
 
 public:
-    PizzaHandler(const std::string &format) : _format(format)
+    RequestHandler(const std::string &format) : _format(format)
     {
     }
 
